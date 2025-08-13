@@ -1,0 +1,43 @@
+# Puerto en el que correrá el api-gateway para evitar conflictos con el 8080
+server:
+  port: 8082
+
+# Configuración para que el gateway se registre y encuentre otros servicios en Eureka
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka/
+
+# Configuración principal de Spring Cloud Gateway
+spring:
+  cloud:
+    gateway:
+      # Habilita el enrutamiento automático basado en los nombres de los servicios registrados en Eureka.
+      # Por ejemplo, una petición a /auth-service/** será redirigida al auth-service.
+      discovery:
+        locator:
+          enabled: true
+
+      # Definición de rutas explícitas. Esto te da más control y es la práctica recomendada.
+      routes:
+        # Ruta para el futuro 'auth-service'
+        # Cualquier petición que empiece con /api/v1/auth/ será redirigida
+        # a una instancia del servicio registrado en Eureka como "AUTH-SERVICE".
+        - id: auth-service-route
+          uri: lb://AUTH-SERVICE
+          predicates:
+            - Path=/api/v1/auth/**
+
+        # Ruta para el futuro 'onboarding-service'
+        # Cualquier petición que empiece con /api/v1/onboarding/ será redirigida
+        # a una instancia del servicio registrado en Eureka como "ONBOARDING-SERVICE".
+        - id: onboarding-service-route
+          uri: lb://ONBOARDING-SERVICE
+          predicates:
+            - Path=/api/v1/onboarding/**
+
+        # Ruta para el futuro 'merchant-service'
+        - id: merchant-service-route
+          uri: lb://MERCHANT-SERVICE
+          predicates:
+            - Path=/api/v1/merchants/**
